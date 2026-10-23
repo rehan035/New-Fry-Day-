@@ -8,43 +8,36 @@ export const QualityPromise: React.FC = () => {
       id="craft"
     >
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 md:px-12">
-        {/* Consistent Left-Aligned Editorial Header */}
-        <div className="max-w-2xl mb-12 text-left">
-          <p className="text-xs font-bold text-brand-red dark:text-red-400 uppercase tracking-[0.14em] mb-2">
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <span className="text-xs font-bold text-brand-red dark:text-red-400 uppercase tracking-widest">
             Our Culinary Standard
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-display font-extrabold text-[#281715] dark:text-white tracking-tight leading-[1.15]">
+          </span>
+          <h2 className="text-3xl md:text-4xl font-display font-extrabold text-primary dark:text-white tracking-tight mt-1">
             The Fry Day Quality Promise
           </h2>
-          <p className="text-sm sm:text-base text-on-surface-variant dark:text-zinc-400 mt-2 leading-relaxed">
+          <p className="text-sm md:text-base text-on-surface-variant dark:text-zinc-400 mt-2">
             We don't cut corners. From locally sourced premium poultry to brioche buns baked before
-            sunrise, every step in our kitchen is engineered for honest flavor.
+            sunrise, we take casual dining seriously.
           </p>
         </div>
 
-        {/* 4-Column Craft Pillars Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-          {QUALITY_PILLARS.map((pillar, index) => (
+        {/* Bento Grid: Craft Pillars */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+          {QUALITY_PILLARS.map((pillar) => (
             <div
               key={pillar.title}
-              className="p-6 rounded-2xl bg-surface dark:bg-[#1a1a1f] border border-outline-variant/30 dark:border-zinc-800 flex flex-col justify-between hover:border-brand-red/40 dark:hover:border-red-400/40 transition-colors shadow-sm text-left"
+              className="p-6 rounded-2xl bg-surface dark:bg-[#1a1a1f] border border-outline-variant/30 dark:border-zinc-800 flex flex-col justify-between hover:border-brand-red/40 dark:hover:border-red-400/40 transition-all shadow-sm group text-left"
             >
-              <div className="flex items-center justify-between mb-6">
-                <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center ${pillar.accentClass}`}
-                >
-                  <span className="material-symbols-outlined text-2xl">{pillar.icon}</span>
-                </div>
-                <span className="text-xs font-mono font-bold text-on-surface-variant/50 dark:text-zinc-500 tabular-nums">
-                  0{index + 1}
-                </span>
+              <div
+                className={`w-12 h-12 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform ${pillar.accentClass}`}
+              >
+                <span className="material-symbols-outlined text-2xl">{pillar.icon}</span>
               </div>
-
               <div>
-                <h3 className="text-lg font-display font-bold text-[#281715] dark:text-white mb-2 leading-snug">
+                <h3 className="text-lg font-display font-bold text-primary dark:text-white mb-2">
                   {pillar.title}
                 </h3>
-                <p className="text-xs sm:text-sm text-on-surface-variant dark:text-zinc-400 leading-relaxed">
+                <p className="text-xs text-on-surface-variant dark:text-zinc-400 leading-relaxed">
                   {pillar.description}
                 </p>
               </div>

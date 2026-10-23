@@ -16,164 +16,130 @@ export const Footer: React.FC<FooterProps> = ({ cartCount, cartSubtotal, onOpenC
           {cartCount > 0 ? (
             <>
               <div className="text-left">
-                <p className="text-[11px] font-bold text-brand-red dark:text-red-400">
-                  {cartCount} {cartCount === 1 ? 'Item' : 'Items'} in Order Bag
+                <p className="text-[10px] uppercase font-bold text-brand-red dark:text-red-400">
+                  {cartCount} {cartCount === 1 ? 'Item' : 'Items'} in Bag
                 </p>
-                <p className="text-sm font-display font-extrabold text-[#281715] dark:text-white tabular-nums">
+                <p className="text-xs font-extrabold text-primary dark:text-white tabular-nums">
                   Total: Rs. {cartSubtotal}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={onOpenCart}
-                className="h-10 px-5 rounded-xl bg-brand-red hover:bg-brand-red-hover text-white font-bold text-xs inline-flex items-center gap-2 shadow-sm cursor-pointer"
+                className="flex items-center gap-2 bg-brand-red hover:bg-brand-red-hover text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-md active:scale-95 transition-transform cursor-pointer"
               >
                 <span className="material-symbols-outlined text-base">shopping_bag</span>
-                <span>View &amp; Checkout</span>
+                <span>Checkout Order</span>
               </button>
             </>
           ) : (
             <>
               <div className="text-left">
-                <p className="text-[11px] font-medium text-on-surface-variant dark:text-zinc-400">
-                  W Canal Road · Open Daily
+                <p className="text-[10px] uppercase font-bold text-on-surface-variant dark:text-zinc-400">
+                  Craving Fast Casual?
                 </p>
-                <p className="text-xs font-extrabold text-[#281715] dark:text-white tabular-nums">
-                  Serving Hot Until 3:00 AM
+                <p className="text-xs font-extrabold text-primary dark:text-white">
+                  Serving Warm Till 3 AM
                 </p>
               </div>
               <a
-                className="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs inline-flex items-center gap-2 shadow-sm"
+                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-md active:scale-95 transition-transform"
                 href={`https://wa.me/${RESTAURANT_INFO.whatsappNumber}?text=Hello%20Fry%20Day!%20I%20would%20like%20to%20place%20an%20order.`}
                 rel="noopener noreferrer"
                 target="_blank"
               >
                 <span className="material-symbols-outlined text-base">chat</span>
-                <span>WhatsApp Order</span>
+                <span>Quick WhatsApp</span>
               </a>
             </>
           )}
         </div>
       </div>
 
-      {/* DESKTOP FLOATING ACTION */}
-      <div className="hidden md:flex fixed bottom-6 right-6 z-40 items-center gap-3">
+      {/* FLOATING WHATSAPP ACTION BUTTON */}
+      <div className="hidden md:flex fixed bottom-6 right-6 z-50 items-center gap-3">
         {cartCount > 0 && (
           <button
             type="button"
             onClick={onOpenCart}
-            className="h-12 px-5 rounded-full bg-brand-red hover:bg-brand-red-hover text-white shadow-xl flex items-center gap-2.5 transition-transform hover:scale-[1.02] border border-white/20 cursor-pointer"
+            className="flex items-center gap-2.5 bg-brand-red hover:bg-brand-red-hover text-white px-5 py-3 rounded-full shadow-2xl transition-all duration-200 hover:scale-105 border-2 border-white/40 dark:border-zinc-700 cursor-pointer"
           >
             <span className="material-symbols-outlined text-xl">shopping_bag</span>
             <span className="text-sm font-bold tabular-nums">
-              Order Bag ({cartCount}) · Rs. {cartSubtotal}
+              Bag ({cartCount}) · Rs. {cartSubtotal}
             </span>
           </button>
         )}
         <a
           aria-label="Order on WhatsApp"
-          className="h-12 px-5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl flex items-center gap-2.5 transition-transform hover:scale-[1.02] border border-white/20"
+          className="flex items-center gap-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-5 py-3 rounded-full shadow-2xl hover:from-emerald-500 hover:to-emerald-600 transition-all duration-200 hover:scale-105 group border-2 border-white/40 dark:border-zinc-700"
           href={`https://wa.me/${RESTAURANT_INFO.whatsappNumber}?text=Hello%20Fry%20Day!%20I%20would%20like%20to%20order%20food.`}
           rel="noopener noreferrer"
           target="_blank"
         >
-          <span className="material-symbols-outlined text-xl">chat</span>
-          <span className="text-sm font-bold">WhatsApp Order</span>
+          <span className="material-symbols-outlined text-2xl text-emerald-200">chat</span>
+          <span className="text-sm font-bold tracking-wide">WhatsApp Order</span>
         </a>
       </div>
 
-      {/* STRUCTURED 4-COLUMN RESTAURANT FOOTER */}
-      <footer className="bg-[#160808] dark:bg-[#0c0c0e] text-white border-t border-white/10">
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 md:px-12 py-14">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 text-left">
-            {/* Col 1: Brand & Story */}
-            <div className="lg:col-span-4 space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-brand-red flex items-center justify-center text-white">
-                  <span className="material-symbols-outlined text-lg">lunch_dining</span>
-                </div>
-                <span className="text-2xl font-display font-extrabold tracking-tight text-white">
-                  {RESTAURANT_INFO.name}
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm text-zinc-400 max-w-sm leading-relaxed">
-                Faisalabad’s premier fast-casual dining destination. Freshly smashed prime beef
-                burgers, 18-hour marinated crispy broast, and loaded hand-cut fries.
-              </p>
-            </div>
-
-            {/* Col 2: Navigation */}
-            <div className="lg:col-span-2 space-y-2.5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-gold-400">
-                Explore
-              </h3>
-              <ul className="space-y-2 text-xs sm:text-sm text-zinc-300">
-                <li>
-                  <a href="#menu" className="hover:text-white transition-colors">
-                    Artisan Menu
-                  </a>
-                </li>
-                <li>
-                  <a href="#craft" className="hover:text-white transition-colors">
-                    Quality Promise
-                  </a>
-                </li>
-                <li>
-                  <a href="#about" className="hover:text-white transition-colors">
-                    Our Story
-                  </a>
-                </li>
-                <li>
-                  <a href="#location" className="hover:text-white transition-colors">
-                    Location &amp; Map
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Col 3: Operating Hours */}
-            <div className="lg:col-span-3 space-y-2.5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-gold-400">
-                Location &amp; Hours
-              </h3>
-              <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
-                W Canal Road, Jahan E Andalus,
-                <br />
-                Faisalabad, Punjab, Pakistan
-              </p>
-              <p className="text-xs sm:text-sm text-white font-semibold tabular-nums pt-1">
-                Open Daily: 12:00 PM – 3:00 AM
-              </p>
-            </div>
-
-            {/* Col 4: Direct Contact */}
-            <div className="lg:col-span-3 space-y-2.5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-gold-400">
-                Order Direct
-              </h3>
-              <p className="text-sm font-bold text-white tabular-nums">
-                {RESTAURANT_INFO.phone}
-              </p>
-              <div className="pt-1 flex flex-col gap-2">
-                <a
-                  href={`https://wa.me/${RESTAURANT_INFO.whatsappNumber}?text=Hello%20Fry%20Day!%20I%20would%20like%20to%20place%20an%20order.`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="h-9 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold inline-flex items-center justify-center gap-1.5 w-fit transition-colors"
-                >
-                  <span className="material-symbols-outlined text-sm">chat</span>
-                  <span>Order on WhatsApp</span>
-                </a>
-              </div>
-            </div>
+      {/* FOOTER (Shared Component Anchor) */}
+      <footer className="bg-[#1f0808] dark:bg-[#0c0c0e] text-white docked full-width border-t border-brand-red/30 dark:border-zinc-800 transition-colors">
+        <div className="w-full px-6 md:px-12 py-12 md:py-16 max-w-[1280px] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          {/* Footer Brand Column */}
+          <div className="flex flex-col items-center md:items-start text-center md:text-left">
+            <img
+              src="/assets/aistudio/fry_days_logo_small_c6ff3652.png"
+              alt="Fry Days Logo"
+              className="h-12 w-auto object-contain"
+            />
+            <p className="text-xs text-zinc-400 max-w-sm mt-2 leading-relaxed">
+              © 2025 Fry Day Gourmet Casual Dining. W Canal Road, Jahan E Andalus, Faisalabad. All
+              rights reserved.
+            </p>
           </div>
 
-          <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-400">
-            <p>
-              © {new Date().getFullYear()} Fry Day Gourmet Casual Dining, Faisalabad. All rights
-              reserved.
-            </p>
-            <p>Dine-In · Outdoor Patio · Car-Hop · Delivery</p>
+          {/* Links Cluster */}
+          <div className="flex flex-wrap items-center justify-center gap-6">
+            <a
+              className="text-xs text-zinc-300 hover:text-gold-400 transition-colors"
+              href="#menu"
+            >
+              Menu
+            </a>
+            <a
+              className="text-xs text-zinc-300 hover:text-gold-400 transition-colors"
+              href="#about"
+            >
+              About Us
+            </a>
+            <a
+              className="text-xs text-zinc-300 hover:text-gold-400 transition-colors"
+              href="#craft"
+            >
+              Quality Promise
+            </a>
+            <a
+              className="text-xs text-zinc-300 hover:text-gold-400 transition-colors"
+              href="#location"
+            >
+              Location &amp; Hours
+            </a>
+            <a
+              className="text-xs text-zinc-300 hover:text-gold-400 transition-colors"
+              href={`https://wa.me/${RESTAURANT_INFO.whatsappNumber}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              WhatsApp Support
+            </a>
+            <a
+              className="text-xs text-zinc-300 hover:text-gold-400 transition-colors"
+              href={RESTAURANT_INFO.mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Google Maps Directions
+            </a>
           </div>
         </div>
       </footer>
