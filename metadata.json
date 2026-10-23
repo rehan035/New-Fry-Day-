@@ -1,0 +1,6 @@
+{
+  "name": "Fry Day — Gourmet Casual Dining Faisalabad",
+  "description": "Faisalabad's favorite gourmet fast-casual restaurant on W Canal Road, Jahan E Andalus. Smashed beef burgers, crispy double-fried chicken, loaded hand-cut fries, and artisan shakes served daily from 12 PM to 3 AM.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
