@@ -20,6 +20,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const navLinks = [
     { href: '#menu', label: 'Menu', id: 'menu' },
+    { href: '#offers', label: 'Deals & Combos', id: 'offers' },
     { href: '#about', label: 'About Us', id: 'about' },
     { href: '#craft', label: 'Quality Promise', id: 'craft' },
     { href: '#location', label: 'Location & Hours', id: 'location' },

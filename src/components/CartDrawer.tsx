@@ -31,29 +31,39 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   if (!isOpen) return null;
 
   const subtotal = entries.reduce((sum, entry) => {
+    const basePrice = entry.selectedSize ? entry.selectedSize.price : entry.item.price;
     const addonsPrice = entry.selectedAddons.reduce((aSum, a) => aSum + a.price, 0);
-    return sum + (entry.item.price + addonsPrice) * entry.quantity;
+    return sum + (basePrice + addonsPrice) * entry.quantity;
   }, 0);
 
-  const deliveryFee = orderType === 'Delivery' && subtotal > 0 ? (subtotal >= 2000 ? 0 : 120) : 0;
+  const deliveryFee =
+    orderType === 'Delivery' && subtotal > 0 ? (subtotal >= 2000 ? 0 : 120) : 0;
   const grandTotal = subtotal + deliveryFee;
 
   const formatOrderMessage = () => {
     const lines = [
-      `*NEW ORDER — FRY DAY FAISALABAD*`,
+      `*NEW ORDER — FRY DAYS FAISALABAD*`,
       `Order Mode: *${orderType}*`,
       `--------------------------------`,
     ];
 
     entries.forEach((entry, idx) => {
+      const basePrice = entry.selectedSize ? entry.selectedSize.price : entry.item.price;
       const addonsPrice = entry.selectedAddons.reduce((aSum, a) => aSum + a.price, 0);
-      const lineTotal = (entry.item.price + addonsPrice) * entry.quantity;
-      lines.push(`${idx + 1}. *${entry.quantity}x ${entry.item.name}* — Rs. ${lineTotal}`);
+      const lineTotal = (basePrice + addonsPrice) * entry.quantity;
+      const sizeSuffix = entry.selectedSize ? ` (${entry.selectedSize.label})` : '';
+      lines.push(
+        `${idx + 1}. *${entry.quantity}x ${entry.item.name}${sizeSuffix}* — PKR ${lineTotal.toLocaleString()}`
+      );
       if (entry.spiceLevel) {
         lines.push(`   • Spice: ${entry.spiceLevel}`);
       }
       if (entry.selectedAddons.length > 0) {
-        lines.push(`   • Add-ons: ${entry.selectedAddons.map((a) => a.name).join(', ')}`);
+        lines.push(
+          `   • Add-ons: ${entry.selectedAddons
+            .map((a) => `${a.name} (+Rs. ${a.price})`)
+            .join(', ')}`
+        );
       }
       if (entry.notes) {
         lines.push(`   • Note: ${entry.notes}`);
@@ -61,11 +71,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     });
 
     lines.push(`--------------------------------`);
-    lines.push(`Subtotal: Rs. ${subtotal}`);
+    lines.push(`Subtotal: PKR ${subtotal.toLocaleString()}`);
     if (orderType === 'Delivery') {
-      lines.push(`Delivery Fee: ${deliveryFee === 0 ? 'FREE' : `Rs. ${deliveryFee}`}`);
+      lines.push(`Delivery Fee: ${deliveryFee === 0 ? 'FREE' : `PKR ${deliveryFee}`}`);
     }
-    lines.push(`*Total Payable: Rs. ${grandTotal}* (Cash on Delivery / Counter)`);
+    lines.push(`*Total Payable: PKR ${grandTotal.toLocaleString()}* (Cash on Delivery / Counter)`);
 
     if (customerName.trim() || customerPhone.trim() || locationDetail.trim()) {
       lines.push(`--------------------------------`);
@@ -101,7 +111,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label="Your Fry Day Order Bag"
+      aria-label="Your Fry Days Order Bag"
     >
       <div
         className="w-full max-w-md bg-surface-container-lowest dark:bg-[#16161a] h-full flex flex-col justify-between shadow-2xl border-l border-outline-variant/30 dark:border-zinc-800"
@@ -109,7 +119,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
       >
         {/* Top Drawer Header */}
         <div className="px-6 py-5 border-b border-outline-variant/30 dark:border-zinc-800 flex items-center justify-between bg-surface dark:bg-[#1a1a1f]">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 text-left">
             <div className="w-9 h-9 rounded-xl bg-brand-red text-white flex items-center justify-center shadow-sm">
               <span className="material-symbols-outlined text-xl">shopping_bag</span>
             </div>
@@ -118,7 +128,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 Your Order Bag
               </h2>
               <p className="text-xs text-on-surface-variant dark:text-zinc-400 mt-1">
-                W Canal Road Kitchen · Instant WhatsApp Checkout
+                W Canal Road Kitchen · WhatsApp Order Builder
               </p>
             </div>
           </div>
@@ -143,19 +153,19 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               Your order bag is empty
             </h3>
             <p className="text-xs text-on-surface-variant dark:text-zinc-400 mt-1 max-w-xs leading-relaxed">
-              Add your favorite smashed burgers, loaded fries, or crispy broast to build a full meal
-              order.
+              Add Injected Chicken Broast, Zesty Zinger burgers, Loaded Fries, or Special Combos to
+              prepare your WhatsApp order.
             </p>
             <button
               type="button"
               onClick={onClose}
               className="mt-6 px-6 py-2.5 rounded-full bg-brand-red text-white text-xs font-bold shadow-md hover:bg-brand-red-hover transition-colors cursor-pointer"
             >
-              Browse Artisan Menu
+              Browse Full Menu
             </button>
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto p-5 space-y-5">
+          <div className="flex-1 overflow-y-auto p-5 space-y-5 text-left">
             {/* Order Type Selector */}
             <div>
               <div className="flex items-center justify-between mb-2">
@@ -204,29 +214,33 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               </div>
 
               {entries.map((entry) => {
+                const basePrice = entry.selectedSize ? entry.selectedSize.price : entry.item.price;
                 const addonsPrice = entry.selectedAddons.reduce((aSum, a) => aSum + a.price, 0);
-                const lineTotal = (entry.item.price + addonsPrice) * entry.quantity;
+                const lineTotal = (basePrice + addonsPrice) * entry.quantity;
+                const displayName = entry.selectedSize
+                  ? `${entry.item.name} (${entry.selectedSize.label})`
+                  : entry.item.name;
 
                 return (
                   <div
                     key={entry.cartItemId}
                     className="p-3.5 rounded-2xl bg-surface dark:bg-[#1f1f24] border border-outline-variant/30 dark:border-zinc-800 flex gap-3 items-start"
                   >
-                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-surface-container dark:bg-zinc-800 shrink-0">
+                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#f6f4f0] dark:bg-zinc-800 shrink-0 flex items-center justify-center">
                       <SafeImage
                         src={entry.item.image}
-                        alt={entry.item.name}
+                        alt={displayName}
                         fallbackTitle={entry.item.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain p-1"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <h4 className="text-sm font-display font-bold text-primary dark:text-white truncate">
-                          {entry.item.name}
+                          {displayName}
                         </h4>
                         <span className="text-sm font-extrabold text-brand-red dark:text-red-400 tabular-nums whitespace-nowrap">
-                          Rs. {lineTotal}
+                          Rs. {lineTotal.toLocaleString()}
                         </span>
                       </div>
                       {entry.spiceLevel && (
@@ -310,7 +324,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 onChange={(e) => setLocationDetail(e.target.value)}
                 placeholder={
                   orderType === 'Delivery'
-                    ? 'House #, Street, Area in Faisalabad (e.g., Canal Rd, Peoples Colony...)'
+                    ? 'House #, Street, Area in Faisalabad (e.g., W Canal Rd, Peoples Colony...)'
                     : orderType === 'Car-Hop'
                     ? 'Vehicle Color & Number Plate for Car-Hop Service'
                     : 'Preferred Pickup Time or Table Request'
@@ -323,11 +337,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
         {/* Drawer Footer Totals & Checkout */}
         {entries.length > 0 && (
-          <div className="p-5 bg-surface dark:bg-[#1a1a1f] border-t border-outline-variant/30 dark:border-zinc-800 space-y-3">
+          <div className="p-5 bg-surface dark:bg-[#1a1a1f] border-t border-outline-variant/30 dark:border-zinc-800 space-y-3 text-left">
             <div className="space-y-1 text-xs">
               <div className="flex justify-between text-on-surface-variant dark:text-zinc-400">
                 <span>Subtotal</span>
-                <span className="font-semibold tabular-nums">Rs. {subtotal}</span>
+                <span className="font-semibold tabular-nums">
+                  Rs. {subtotal.toLocaleString()}
+                </span>
               </div>
               {orderType === 'Delivery' && (
                 <div className="flex justify-between text-on-surface-variant dark:text-zinc-400">
@@ -338,9 +354,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 </div>
               )}
               <div className="flex justify-between text-sm font-display font-extrabold text-primary dark:text-white pt-1 border-t border-outline-variant/20 dark:border-zinc-800">
-                <span>Total Payable (COD)</span>
+                <span>Estimated Total (COD)</span>
                 <span className="text-brand-red dark:text-red-400 tabular-nums">
-                  Rs. {grandTotal}
+                  Rs. {grandTotal.toLocaleString()}
                 </span>
               </div>
             </div>
@@ -353,7 +369,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 className="w-full py-3.5 px-5 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-bold text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2 transition-all"
               >
                 <span className="material-symbols-outlined text-lg">chat</span>
-                <span>Send Complete Order on WhatsApp</span>
+                <span>Open WhatsApp to Send Order</span>
               </a>
 
               <button
@@ -361,7 +377,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 onClick={handleCopyOrder}
                 className="w-full py-2 px-4 rounded-full bg-surface-container dark:bg-zinc-800 text-on-surface-variant dark:text-zinc-300 hover:text-primary dark:hover:text-white text-xs font-bold transition-colors cursor-pointer"
               >
-                {copiedSummary ? 'Order Summary Copied!' : 'Copy Order Receipt Text'}
+                {copiedSummary ? 'Order Summary Copied!' : 'Copy Order Summary Text'}
               </button>
             </div>
           </div>

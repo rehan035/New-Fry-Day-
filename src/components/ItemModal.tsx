@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { MenuAddon, MenuItem, RESTAURANT_INFO } from '../data/menuData';
+import React, { useEffect, useState } from 'react';
+import { MenuAddon, MenuItem, MenuSizeOption, RESTAURANT_INFO } from '../data/menuData';
 import { SafeImage } from './SafeImage';
 
 export interface CartOrderEntry {
   cartItemId: string;
   item: MenuItem;
+  selectedSize?: MenuSizeOption;
   quantity: number;
   spiceLevel?: string;
   selectedAddons: MenuAddon[];
@@ -13,34 +14,55 @@ export interface CartOrderEntry {
 
 interface ItemModalProps {
   item: MenuItem | null;
+  initialSize?: MenuSizeOption;
   onClose: () => void;
   onAddToCart: (entry: Omit<CartOrderEntry, 'cartItemId'>) => void;
 }
 
-const SPICE_LEVELS = ['Mild & Savory', 'Classic Fry Day', 'Fiery Nashville Hot'];
+const SPICE_LEVELS = ['Mild & Savory', 'Classic Fry Days', 'Extra Spicy'];
 
-export const ItemModal: React.FC<ItemModalProps> = ({ item, onClose, onAddToCart }) => {
+export const ItemModal: React.FC<ItemModalProps> = ({
+  item,
+  initialSize,
+  onClose,
+  onAddToCart,
+}) => {
   const [quantity, setQuantity] = useState(1);
-  const [spiceLevel, setSpiceLevel] = useState<string>('Classic Fry Day');
+  const [selectedSize, setSelectedSize] = useState<MenuSizeOption | undefined>(initialSize);
+  const [spiceLevel, setSpiceLevel] = useState<string>('Classic Fry Days');
   const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
+
+  useEffect(() => {
+    if (item) {
+      setQuantity(1);
+      setSelectedSize(initialSize || (item.sizes && item.sizes.length > 0 ? item.sizes[0] : undefined));
+      setSpiceLevel('Classic Fry Days');
+      setSelectedAddonIds([]);
+      setNotes('');
+    }
+  }, [item, initialSize]);
 
   if (!item) return null;
 
   const toggleAddon = (id: string) => {
     setSelectedAddonIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((addonId) => addonId !== id) : [...prev, id]
     );
   };
 
+  const basePrice = selectedSize ? selectedSize.price : item.price;
   const selectedAddons = item.addons.filter((a) => selectedAddonIds.includes(a.id));
   const addonsTotal = selectedAddons.reduce((sum, a) => sum + a.price, 0);
-  const unitPrice = item.price + addonsTotal;
+  const unitPrice = basePrice + addonsTotal;
   const totalPrice = unitPrice * quantity;
+
+  const displayTitle = selectedSize ? `${item.name} (${selectedSize.label})` : item.name;
 
   const handleAddToBag = () => {
     onAddToCart({
       item,
+      selectedSize,
       quantity,
       spiceLevel: item.spiceOptions ? spiceLevel : undefined,
       selectedAddons,
@@ -51,8 +73,8 @@ export const ItemModal: React.FC<ItemModalProps> = ({ item, onClose, onAddToCart
 
   const buildDirectWhatsAppUrl = () => {
     const parts = [
-      `Hello Fry Day! I would like to order:`,
-      `• ${quantity}x ${item.name} (Rs. ${item.price} each)`,
+      `Hello Fry Days! I would like to order:`,
+      `• ${quantity}x ${displayTitle} (Rs. ${basePrice} each)`,
     ];
     if (item.spiceOptions) {
       parts.push(`  Spice Level: ${spiceLevel}`);
@@ -65,7 +87,7 @@ export const ItemModal: React.FC<ItemModalProps> = ({ item, onClose, onAddToCart
     if (notes.trim()) {
       parts.push(`  Note: ${notes.trim()}`);
     }
-    parts.push(`Total: Rs. ${totalPrice}`);
+    parts.push(`Total: Rs. ${totalPrice.toLocaleString()}`);
     return `https://wa.me/${RESTAURANT_INFO.whatsappNumber}?text=${encodeURIComponent(
       parts.join('\n')
     )}`;
@@ -83,15 +105,15 @@ export const ItemModal: React.FC<ItemModalProps> = ({ item, onClose, onAddToCart
         className="w-full sm:max-w-lg bg-surface-container-lowest dark:bg-[#1a1a1f] rounded-t-3xl sm:rounded-3xl border border-outline-variant/30 dark:border-zinc-800 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Dish Header Image */}
-        <div className="relative h-56 sm:h-64 bg-surface-container dark:bg-zinc-800 shrink-0">
+        {/* Dish Header Image (4:3 Studio Frame) */}
+        <div className="relative aspect-[4/3] max-h-64 w-full bg-zinc-900 shrink-0 flex items-center justify-center overflow-hidden">
           <SafeImage
             src={item.image}
             alt={item.alt}
             fallbackTitle={item.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-center"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
 
           <button
             type="button"
@@ -102,7 +124,7 @@ export const ItemModal: React.FC<ItemModalProps> = ({ item, onClose, onAddToCart
             <span className="material-symbols-outlined text-xl">close</span>
           </button>
 
-          <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between gap-3">
+          <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between gap-3 text-left">
             <div>
               {item.badge && (
                 <span className="inline-block px-2.5 py-0.5 rounded-full bg-brand-red text-white text-[11px] font-bold mb-1.5">
@@ -113,25 +135,106 @@ export const ItemModal: React.FC<ItemModalProps> = ({ item, onClose, onAddToCart
                 id="modal-dish-title"
                 className="text-xl sm:text-2xl font-display font-extrabold text-white"
               >
-                {item.name}
+                {displayTitle}
               </h3>
               <p className="text-xs text-zinc-200 flex items-center gap-2 mt-0.5">
-                <span>{item.mobileTag}</span>
+                <span>{item.categoryLabel}</span>
                 <span>·</span>
                 <span>Prep: {item.prepTime}</span>
               </p>
             </div>
-            <span className="px-3.5 py-1.5 rounded-full bg-gold-500 text-white font-extrabold text-sm shadow-md tabular-nums whitespace-nowrap">
-              Rs. {item.price}
-            </span>
+            <div className="text-right shrink-0">
+              {item.originalPrice && (
+                <span className="block text-xs font-bold text-zinc-300 line-through tabular-nums">
+                  Original: Rs. {item.originalPrice.toLocaleString()}
+                </span>
+              )}
+              <span className="inline-block px-3.5 py-1.5 rounded-full bg-gold-500 text-zinc-950 font-extrabold text-sm shadow-md tabular-nums whitespace-nowrap">
+                Rs. {basePrice.toLocaleString()}
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Scrollable Customization Body */}
-        <div className="p-5 sm:p-6 overflow-y-auto space-y-5 flex-1">
+        <div className="p-5 sm:p-6 overflow-y-auto space-y-5 flex-1 text-left">
+          {item.promoBanner && (
+            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs font-extrabold text-emerald-700 dark:text-emerald-300">
+              {item.promoBanner}
+            </div>
+          )}
+
           <p className="text-xs sm:text-sm text-on-surface-variant dark:text-zinc-300 leading-relaxed">
             {item.description}
           </p>
+
+          {item.verificationNote && (
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-800 dark:text-amber-300 font-medium">
+              {item.verificationNote}
+            </div>
+          )}
+
+          {/* Combo Contents List */}
+          {item.comboContents && item.comboContents.length > 0 && (
+            <div className="p-3.5 rounded-2xl bg-surface-container/60 dark:bg-zinc-800/70 border border-outline-variant/30 dark:border-zinc-700">
+              <span className="block text-[11px] font-bold uppercase tracking-wider text-brand-red dark:text-red-400 mb-2">
+                Included in {item.name}:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {item.comboContents.map((part) => (
+                  <span
+                    key={part}
+                    className="px-2.5 py-1 rounded-lg bg-surface-container-lowest dark:bg-zinc-900 text-xs font-semibold text-primary dark:text-zinc-200 border border-outline-variant/30 dark:border-zinc-700"
+                  >
+                    ✓ {part}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Size / Free Loaded Fries Selection */}
+          {item.sizes && item.sizes.length > 0 && (
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-primary dark:text-zinc-200 mb-2.5">
+                {item.id === 'azadi-deal'
+                  ? 'Choose Your FREE Loaded Fries Variety'
+                  : 'Select Size / Variant'}
+              </label>
+              <div
+                className={`grid gap-2 ${
+                  item.sizes.length === 2 || item.sizes.length === 4
+                    ? 'grid-cols-2'
+                    : 'grid-cols-3'
+                }`}
+              >
+                {item.sizes.map((sizeOpt) => {
+                  const active = selectedSize?.id === sizeOpt.id;
+                  return (
+                    <button
+                      key={sizeOpt.id}
+                      type="button"
+                      onClick={() => setSelectedSize(sizeOpt)}
+                      className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+                        active
+                          ? 'bg-brand-red text-white border-brand-red shadow-sm'
+                          : 'bg-surface-container/60 dark:bg-zinc-800/80 text-on-surface-variant dark:text-zinc-300 border-outline-variant/30 dark:border-zinc-700 hover:border-brand-red/40'
+                      }`}
+                    >
+                      <span>{sizeOpt.label}</span>
+                      <span
+                        className={`text-[11px] font-extrabold tabular-nums ${
+                          active ? 'text-gold-200' : 'text-brand-red dark:text-red-400'
+                        }`}
+                      >
+                        Rs. {sizeOpt.price.toLocaleString()}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Spice Level Selector */}
           {item.spiceOptions && (
@@ -165,7 +268,7 @@ export const ItemModal: React.FC<ItemModalProps> = ({ item, onClose, onAddToCart
           {item.addons.length > 0 && (
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-primary dark:text-zinc-200 mb-2.5">
-                Gourmet Upgrades &amp; Add-Ons (Optional)
+                Menu Add-Ons &amp; Dips (Optional)
               </label>
               <div className="space-y-2">
                 {item.addons.map((addon) => {
@@ -219,7 +322,7 @@ export const ItemModal: React.FC<ItemModalProps> = ({ item, onClose, onAddToCart
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g., Extra crispy, no onions, extra sauce on side..."
+              placeholder="e.g., Extra crispy, chest piece preference, drink flavor..."
               className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-surface dark:bg-zinc-800/80 text-on-surface dark:text-white border border-outline-variant/40 dark:border-zinc-700 focus:outline-none focus:border-brand-red"
             />
           </div>
@@ -261,7 +364,7 @@ export const ItemModal: React.FC<ItemModalProps> = ({ item, onClose, onAddToCart
                 <span className="material-symbols-outlined text-lg">shopping_bag</span>
                 <span>Add to Order Bag</span>
               </span>
-              <span className="font-extrabold tabular-nums">Rs. {totalPrice}</span>
+              <span className="font-extrabold tabular-nums">Rs. {totalPrice.toLocaleString()}</span>
             </button>
           </div>
 
@@ -272,7 +375,7 @@ export const ItemModal: React.FC<ItemModalProps> = ({ item, onClose, onAddToCart
             className="w-full py-2.5 px-4 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-sm"
           >
             <span className="material-symbols-outlined text-base">chat</span>
-            <span>Order Immediately on WhatsApp (Rs. {totalPrice})</span>
+            <span>Order Immediately on WhatsApp (Rs. {totalPrice.toLocaleString()})</span>
           </a>
         </div>
       </div>

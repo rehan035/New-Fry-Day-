@@ -13,9 +13,10 @@ import { LocationSection } from './components/LocationSection';
 import { MenuSection } from './components/MenuSection';
 import { Navbar } from './components/Navbar';
 import { QualityPromise } from './components/QualityPromise';
-import { MenuItem } from './data/menuData';
+import { SpecialOffersSection } from './components/SpecialOffersSection';
+import { MenuItem, MenuSizeOption } from './data/menuData';
 
-const CART_STORAGE_KEY = 'fry_day_fsd_cart_v1';
+const CART_STORAGE_KEY = 'fry_day_fsd_cart_v2';
 
 export default function App() {
   // Theme state with localStorage & system preference detection
@@ -39,6 +40,9 @@ export default function App() {
   });
 
   const [selectedDish, setSelectedDish] = useState<MenuItem | null>(null);
+  const [selectedInitialSize, setSelectedInitialSize] = useState<MenuSizeOption | undefined>(
+    undefined
+  );
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('menu');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -66,7 +70,7 @@ export default function App() {
 
   // Scroll spy for navigation links
   useEffect(() => {
-    const sectionIds = ['menu', 'craft', 'about', 'location'];
+    const sectionIds = ['menu', 'offers', 'craft', 'about', 'location'];
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 180;
       for (const id of sectionIds) {
@@ -97,9 +101,10 @@ export default function App() {
       .map((a) => a.id)
       .sort()
       .join(',');
-    const signature = `${newEntry.item.id}__${newEntry.spiceLevel || ''}__${addonSignature}__${
-      newEntry.notes
-    }`;
+    const sizeSignature = newEntry.selectedSize?.id || '';
+    const signature = `${newEntry.item.id}__${sizeSignature}__${
+      newEntry.spiceLevel || ''
+    }__${addonSignature}__${newEntry.notes}`;
 
     setCartEntries((prev) => {
       const existingIndex = prev.findIndex((e) => e.cartItemId === signature);
@@ -114,17 +119,26 @@ export default function App() {
       return [...prev, { ...newEntry, cartItemId: signature }];
     });
 
-    showToast(`Added ${newEntry.quantity}x ${newEntry.item.name} to Order Bag`);
+    const sizeSuffix = newEntry.selectedSize ? ` (${newEntry.selectedSize.label})` : '';
+    showToast(`Added ${newEntry.quantity}x ${newEntry.item.name}${sizeSuffix} to Order Bag`);
   };
 
-  const handleQuickAdd = (item: MenuItem) => {
+  const handleQuickAdd = (item: MenuItem, chosenSize?: MenuSizeOption) => {
+    const defaultSize =
+      chosenSize || (item.sizes && item.sizes.length > 0 ? item.sizes[0] : undefined);
     handleAddToCart({
       item,
+      selectedSize: defaultSize,
       quantity: 1,
-      spiceLevel: item.spiceOptions ? 'Classic Fry Day' : undefined,
+      spiceLevel: item.spiceOptions ? 'Classic Fry Days' : undefined,
       selectedAddons: [],
       notes: '',
     });
+  };
+
+  const handleOpenDishModal = (item: MenuItem, preselectedSize?: MenuSizeOption) => {
+    setSelectedInitialSize(preselectedSize);
+    setSelectedDish(item);
   };
 
   const handleUpdateQuantity = (cartItemId: string, delta: number) => {
@@ -155,8 +169,9 @@ export default function App() {
 
   const totalCartCount = cartEntries.reduce((sum, e) => sum + e.quantity, 0);
   const cartSubtotal = cartEntries.reduce((sum, entry) => {
+    const basePrice = entry.selectedSize ? entry.selectedSize.price : entry.item.price;
     const addonsPrice = entry.selectedAddons.reduce((aSum, a) => aSum + a.price, 0);
-    return sum + (entry.item.price + addonsPrice) * entry.quantity;
+    return sum + (basePrice + addonsPrice) * entry.quantity;
   }, 0);
 
   return (
@@ -170,11 +185,15 @@ export default function App() {
       />
 
       <main className="flex-1">
-        <Hero onSelectDish={(item) => setSelectedDish(item)} />
+        <Hero onSelectDish={(item) => handleOpenDishModal(item)} />
         <MenuSection
-          onSelectDish={(item) => setSelectedDish(item)}
+          onSelectDish={handleOpenDishModal}
           onQuickAdd={handleQuickAdd}
           getItemQuantity={getItemQuantity}
+        />
+        <SpecialOffersSection
+          onSelectDish={(item) => handleOpenDishModal(item)}
+          onQuickAdd={(item) => handleQuickAdd(item)}
         />
         <QualityPromise />
         <AboutSection />
@@ -190,7 +209,11 @@ export default function App() {
       {/* Dish Customization Modal */}
       <ItemModal
         item={selectedDish}
-        onClose={() => setSelectedDish(null)}
+        initialSize={selectedInitialSize}
+        onClose={() => {
+          setSelectedDish(null);
+          setSelectedInitialSize(undefined);
+        }}
         onAddToCart={handleAddToCart}
       />
 
